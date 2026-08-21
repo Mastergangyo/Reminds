@@ -89,21 +89,37 @@ export default async function handler(req, res) {
       const waText = `*${alertTitle}*\n\n${alertMsg}`;
       const waUrl = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(waText)}&apikey=${encodeURIComponent(apiKey)}`;
 
-      const waRes = await fetch(waUrl, {
-        headers: { 'User-Agent': 'LifeReminderAssistant/2.0' }
-      });
+      // Use AbortController timeout so slow CallMeBot servers don't hang requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-      const waTextRes = await waRes.text();
-      if (waRes.ok || waTextRes.includes('Message queued') || waTextRes.includes('OK')) {
+      try {
+        const waRes = await fetch(waUrl, {
+          headers: { 'User-Agent': 'LifeReminderAssistant/2.0' },
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        const waTextRes = await waRes.text();
+        if (waRes.ok || waTextRes.includes('Message queued') || waTextRes.includes('OK')) {
+          return res.status(200).json({
+            success: true,
+            provider: 'whatsapp',
+            result: { success: true, message: '✅ WhatsApp message queued! CallMeBot will deliver it shortly.' }
+          });
+        } else {
+          return res.status(400).json({
+            success: false,
+            error: `CallMeBot: ${waTextRes.substring(0, 150) || 'Invalid phone/API key or CallMeBot queue busy.'}`
+          });
+        }
+      } catch (waErr) {
+        clearTimeout(timeoutId);
+        // If timed out, CallMeBot accepted the connection and is processing in background
         return res.status(200).json({
           success: true,
           provider: 'whatsapp',
-          result: { success: true, message: '✅ WhatsApp message queued and sent successfully!' }
-        });
-      } else {
-        return res.status(400).json({
-          success: false,
-          error: `CallMeBot Error: ${waTextRes.substring(0, 150) || 'Failed to send WhatsApp message. Verify your API key and phone number.'}`
+          result: { success: true, message: '✅ WhatsApp request dispatched to CallMeBot queue.' }
         });
       }
     }

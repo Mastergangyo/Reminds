@@ -439,8 +439,12 @@
             <small class="form-help">Subscription URL: <code id="ntfySubUrl">https://ntfy.sh/reminders_...</code></small>
           </div>
 
-          <div class="ntfy-direct-action" style="margin-top: 10px;">
+          <div class="ntfy-direct-action" style="margin-top: 10px; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
             <a id="ntfyDirectLink" href="#" target="_blank" class="btn btn-outline btn-sm">🔗 Open Web Notification Feed</a>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-secondary btn-sm btn-provider-test">📲 Test Ping</button>
+              <button type="button" class="btn btn-primary btn-sm btn-provider-save">💾 Save ntfy Topic</button>
+            </div>
           </div>
         </div>
 
@@ -450,20 +454,25 @@
             <h4>✈️ Setup Telegram Bot:</h4>
             <ol>
               <li>Open Telegram and message <strong>@BotFather</strong> to create a new bot and copy the <strong>HTTP API Token</strong>.</li>
-              <li>Start a chat with your new bot and also message <strong>@userinfobot</strong> to get your numerical <strong>Chat ID</strong>.</li>
-              <li>Paste both fields below and click Save.</li>
+              <li>Start a chat with your new bot and message <a href="https://t.me/userinfobot" target="_blank" style="color: var(--accent-cyan); text-decoration: underline;">@userinfobot</a> to get your numerical <strong>Chat ID</strong> (the number next to <code>Id:</code>).</li>
+              <li>Paste both fields below and click <strong>"Save Telegram Settings"</strong>.</li>
             </ol>
           </div>
 
           <div class="form-row" style="margin-top: 14px;">
             <div class="form-group flex-2">
-              <label for="telegramBotTokenInput">Bot API Token:</label>
+              <label for="telegramBotTokenInput">Bot API Token: <span class="required">*</span></label>
               <input type="password" id="telegramBotTokenInput" placeholder="e.g. 123456789:ABCdefGhIJKlmNoPQRstUVwxyZ">
             </div>
             <div class="form-group flex-1">
-              <label for="telegramChatIdInput">Your Chat ID:</label>
+              <label for="telegramChatIdInput">Your Chat ID: <span class="required">*</span></label>
               <input type="text" id="telegramChatIdInput" placeholder="e.g. 987654321">
             </div>
+          </div>
+
+          <div style="margin-top: 14px; display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
+            <button type="button" class="btn btn-secondary btn-sm btn-provider-test">📲 Send Test Ping</button>
+            <button type="button" class="btn btn-primary btn-sm btn-provider-save">💾 Save Telegram Settings</button>
           </div>
         </div>
 
@@ -472,21 +481,26 @@
           <div class="guide-box">
             <h4>💬 Free WhatsApp Setup (via CallMeBot):</h4>
             <ol>
-              <li>Add phone contact: <strong>+34 644 10 55 84</strong> to your phone or click <a href="https://api.callmebot.com/whatsapp.php" target="_blank">CallMeBot Instructions</a>.</li>
+              <li>Add phone contact: <strong>+34 644 10 55 84</strong> to your phone contacts.</li>
               <li>Send WhatsApp message <code>I allow callmebot to send me messages</code> to that number.</li>
-              <li>You will receive your personal free API Key in WhatsApp. Paste it below with your phone number (including country code, e.g. 919876543210).</li>
+              <li>You will receive your personal API Key in WhatsApp. Paste it below with your phone number (including country code, e.g. <code>919876543210</code>).</li>
             </ol>
           </div>
 
           <div class="form-row" style="margin-top: 14px;">
             <div class="form-group flex-1">
-              <label for="whatsappPhoneInput">Phone Number (with Country Code):</label>
+              <label for="whatsappPhoneInput">Phone Number (with Country Code): <span class="required">*</span></label>
               <input type="text" id="whatsappPhoneInput" placeholder="e.g. 919876543210">
             </div>
             <div class="form-group flex-1">
-              <label for="whatsappApiKeyInput">CallMeBot API Key:</label>
+              <label for="whatsappApiKeyInput">CallMeBot API Key: <span class="required">*</span></label>
               <input type="password" id="whatsappApiKeyInput" placeholder="e.g. 1234567">
             </div>
+          </div>
+
+          <div style="margin-top: 14px; display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
+            <button type="button" class="btn btn-secondary btn-sm btn-provider-test">📲 Send Test Ping</button>
+            <button type="button" class="btn btn-primary btn-sm btn-provider-save">💾 Save WhatsApp Settings</button>
           </div>
         </div>
 
@@ -494,21 +508,29 @@
         <div class="provider-config-box hidden" id="providerBoxPushover">
           <div class="form-row" style="margin-top: 14px;">
             <div class="form-group flex-1">
-              <label for="pushoverUserKeyInput">User Key:</label>
+              <label for="pushoverUserKeyInput">User Key: <span class="required">*</span></label>
               <input type="text" id="pushoverUserKeyInput" placeholder="Your Pushover User Key">
             </div>
             <div class="form-group flex-1">
-              <label for="pushoverApiTokenInput">App API Token:</label>
+              <label for="pushoverApiTokenInput">App API Token: <span class="required">*</span></label>
               <input type="password" id="pushoverApiTokenInput" placeholder="Your Pushover App Token">
             </div>
+          </div>
+          <div style="margin-top: 14px; display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary btn-sm btn-provider-test">📲 Test Ping</button>
+            <button type="button" class="btn btn-primary btn-sm btn-provider-save">💾 Save Pushover</button>
           </div>
         </div>
 
         <!-- PROVIDER 5: Discord Webhook -->
         <div class="provider-config-box hidden" id="providerBoxDiscord">
           <div class="form-group" style="margin-top: 14px;">
-            <label for="discordWebhookInput">Discord Webhook URL:</label>
+            <label for="discordWebhookInput">Discord Webhook URL: <span class="required">*</span></label>
             <input type="url" id="discordWebhookInput" placeholder="https://discord.com/api/webhooks/...">
+          </div>
+          <div style="margin-top: 14px; display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary btn-sm btn-provider-test">📲 Test Ping</button>
+            <button type="button" class="btn btn-primary btn-sm btn-provider-save">💾 Save Discord</button>
           </div>
         </div>
 
@@ -540,7 +562,7 @@
           <span>📲</span> Send Test Ping to Phone
         </button>
         <button type="button" class="btn btn-primary" id="btnSaveMobileSettings">
-          Save & Enable
+          <span>💾</span> Save & Enable Phone Alerts
         </button>
       </div>
     </div>

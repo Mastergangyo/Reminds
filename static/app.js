@@ -1578,6 +1578,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnTestMobileNotification')?.addEventListener('click', testMobilePing);
   document.getElementById('btnSaveMobileSettings')?.addEventListener('click', saveMobileSettings);
 
+  // Inline Provider Save & Test buttons
+  document.querySelectorAll('.btn-provider-save').forEach(btn => {
+    btn.addEventListener('click', saveMobileSettings);
+  });
+  document.querySelectorAll('.btn-provider-test').forEach(btn => {
+    btn.addEventListener('click', testMobilePing);
+  });
+
   // Provider Pill selection
   document.querySelectorAll('.provider-pill').forEach(pill => {
     pill.addEventListener('click', () => {

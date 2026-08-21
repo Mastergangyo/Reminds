@@ -1062,25 +1062,48 @@ document.addEventListener('DOMContentLoaded', () => {
   // Auto-sync & real-time alert polling every 10s
   setInterval(loadData, 10000);
 
-  // Tab Switching
+  // Centralized Tab Switching (Desktop & Mobile Nav)
+  function switchTab(targetTab) {
+    activeTab = targetTab;
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      if (b.getAttribute('data-tab') === targetTab) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    document.querySelectorAll('.mobile-nav-item[data-tab]').forEach(b => {
+      if (b.getAttribute('data-tab') === targetTab) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    
+    if (activeTab === 'reminders') {
+      document.getElementById('tabReminders')?.classList.add('active');
+    } else if (activeTab === 'timeline') {
+      document.getElementById('tabTimeline')?.classList.add('active');
+      renderTimeline();
+    } else if (activeTab === 'history') {
+      document.getElementById('tabHistory')?.classList.add('active');
+      loadHistory();
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      
-      btn.classList.add('active');
-      activeTab = btn.getAttribute('data-tab');
-      
-      if (activeTab === 'reminders') document.getElementById('tabReminders').classList.add('active');
-      else if (activeTab === 'timeline') {
-        document.getElementById('tabTimeline').classList.add('active');
-        renderTimeline();
-      } else if (activeTab === 'history') {
-        document.getElementById('tabHistory').classList.add('active');
-        loadHistory();
-      }
+      const tab = btn.getAttribute('data-tab');
+      if (tab) switchTab(tab);
     });
   });
+
+  document.querySelectorAll('.mobile-nav-item[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.getAttribute('data-tab');
+      if (tab) switchTab(tab);
+    });
+  });
+
+  // Mobile Bottom Nav Sync & FAB
+  document.getElementById('btnMobileNavSync')?.addEventListener('click', openMobileModal);
+  document.getElementById('btnMobileFab')?.addEventListener('click', openAddModal);
 
   // Filters
   document.getElementById('searchInput')?.addEventListener('input', renderReminders);

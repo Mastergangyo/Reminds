@@ -250,6 +250,7 @@
   <!-- Add / Edit Reminder Modal -->
   <div id="reminderModal" class="modal-backdrop hidden">
     <div class="modal-dialog">
+      <div class="modal-drag-handle"></div>
       <div class="modal-header">
         <h2 id="modalTitle">➕ Add New Reminder</h2>
         <button class="modal-close-btn" id="btnCloseModal">&times;</button>
@@ -345,6 +346,7 @@
   <!-- Snooze Options Modal -->
   <div id="snoozeModal" class="modal-backdrop hidden">
     <div class="modal-dialog modal-small">
+      <div class="modal-drag-handle"></div>
       <div class="modal-header">
         <h2>⏰ Snooze Reminder</h2>
         <button class="modal-close-btn" id="btnCloseSnooze">&times;</button>
@@ -364,6 +366,7 @@
   <!-- Dedicated Mobile Phone Notifications Modal -->
   <div id="mobileModal" class="modal-backdrop hidden">
     <div class="modal-dialog modal-medium">
+      <div class="modal-drag-handle"></div>
       <div class="modal-header">
         <div class="modal-title-wrap">
           <span class="modal-header-icon" style="font-size: 22px; margin-right: 8px;">📱</span>
@@ -576,6 +579,29 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating Action Button for Mobile -->
+  <button class="mobile-fab" id="btnMobileFab" title="Add Reminder" aria-label="Add Reminder">➕</button>
+
+  <!-- Modern Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-nav-item active" data-tab="reminders">
+      <span class="mobile-nav-icon">📋</span>
+      <span>Reminders</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="timeline">
+      <span class="mobile-nav-icon">🗓️</span>
+      <span>Timeline</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="history">
+      <span class="mobile-nav-icon">📜</span>
+      <span>History</span>
+    </button>
+    <button class="mobile-nav-item" id="btnMobileNavSync">
+      <span class="mobile-nav-icon">📱</span>
+      <span>Phone</span>
+    </button>
+  </nav>
 
   <!-- Notification Toast Container for in-app popups -->
   <div id="toastContainer" class="toast-container"></div>

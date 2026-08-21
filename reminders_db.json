@@ -1,0 +1,211 @@
+{
+  "settings": {
+    "currency": "₹",
+    "sound_enabled": true,
+    "toast_enabled": true,
+    "theme": "theme-royal",
+    "advance_alert_default": "1_day",
+    "mobile_notifications": {
+      "enabled": true,
+      "provider": "ntfy",
+      "ntfy_topic": "pari_remind",
+      "telegram_bot_token": "",
+      "telegram_chat_id": "",
+      "whatsapp_phone": "",
+      "whatsapp_api_key": "",
+      "pushover_user_key": "",
+      "pushover_api_token": "",
+      "discord_webhook_url": ""
+    }
+  },
+  "reminders": [
+    {
+      "id": "e7d80969-9d2b-44eb-a7d6-66d3da8298c2",
+      "title": "sleep",
+      "category": "custom",
+      "amount": 0.0,
+      "due_date": "2026-08-22",
+      "due_time": "03:00",
+      "recurrence": "monthly",
+      "advance_days": 0,
+      "priority": "high",
+      "notes": "sleep",
+      "link": "",
+      "status": "pending",
+      "snoozed_until": null,
+      "last_notified": null,
+      "created_at": "2026-08-22T02:56:50.025698"
+    },
+    {
+      "id": "27448c57-b376-4679-8656-ffea5b4c9441",
+      "title": "Stock Market Opening Review",
+      "category": "stocks",
+      "amount": 0,
+      "due_date": "2026-08-22",
+      "due_time": "09:15",
+      "recurrence": "weekdays",
+      "advance_days": 0,
+      "priority": "normal",
+      "notes": "Check pre-market trends, global cues, and portfolio watchlist.",
+      "link": "",
+      "status": "pending",
+      "snoozed_until": null,
+      "last_notified": null,
+      "created_at": "2026-08-22T02:21:49.324249"
+    },
+    {
+      "id": "d3aa9923-27b0-4fdc-a8eb-de6a5f89e8a4",
+      "title": "Weekly Planning / Project Review Meeting",
+      "category": "meeting",
+      "amount": 0,
+      "due_date": "2026-08-24",
+      "due_time": "11:00",
+      "recurrence": "weekly",
+      "advance_days": 0,
+      "priority": "high",
+      "notes": "Review monthly deliverables, roadmap and pending action items.",
+      "link": "https://meet.google.com",
+      "status": "pending",
+      "snoozed_until": null,
+      "last_notified": null,
+      "created_at": "2026-08-22T02:21:49.324249"
+    },
+    {
+      "id": "b2dbd70c-ecab-408b-ad8e-0bfbae627873",
+      "title": "Pay Home Rent",
+      "category": "rent",
+      "amount": 15000,
+      "due_date": "2026-09-01",
+      "due_time": "09:00",
+      "recurrence": "monthly",
+      "advance_days": 2,
+      "priority": "high",
+      "notes": "Transfer to landlord bank account / UPI. Collect receipt.",
+      "link": "",
+      "status": "pending",
+      "snoozed_until": null,
+      "last_notified": null,
+      "created_at": "2026-08-22T02:21:49.324249"
+    },
+    {
+      "id": "db6904f1-8136-4218-a94f-6f033c255bdc",
+      "title": "Monthly Grocery Stockup & Essentials",
+      "category": "grocery",
+      "amount": 8000,
+      "due_date": "2026-09-02",
+      "due_time": "16:00",
+      "recurrence": "monthly",
+      "advance_days": 1,
+      "priority": "medium",
+      "notes": "Check pantry: Rice, Atta, Cooking Oil, Spices, Dairy, Cleaning supplies.",
+      "link": "",
+      "status": "pending",
+      "snoozed_until": null,
+      "last_notified": null,
+      "created_at": "2026-08-22T02:21:49.324249"
+    },
+    {
+      "id": "09d5533d-9db1-4a6f-89c0-4d860a0b9fa1",
+      "title": "Stock Market Monthly SIP & Investment",
+      "category": "stocks",
+      "amount": 10000,
+      "due_date": "2026-09-05",
+      "due_time": "09:30",
+      "recurrence": "monthly",
+      "advance_days": 1,
+      "priority": "high",
+      "notes": "Index Funds SIP + Direct Equity allocation check. Verify bank balance.",
+      "link": "",
+      "status": "pending",
+      "snoozed_until": null,
+      "last_notified": null,
+      "created_at": "2026-08-22T02:21:49.324249"
+    },
+    {
+      "id": "7284071a-660e-46f2-888d-21049d8548f4",
+      "title": "Pay Current / Electricity Bill",
+      "category": "electricity",
+      "amount": 2450,
+      "due_date": "2026-09-10",
+      "due_time": "10:30",
+      "recurrence": "monthly",
+      "advance_days": 3,
+      "priority": "high",
+      "notes": "Consumer No: 9876543210. Check unit consumption.",
+      "link": "https://www.electricity.gov.in",
+      "status": "pending",
+      "snoozed_until": null,
+      "last_notified": null,
+      "created_at": "2026-08-22T02:21:49.324249"
+    },
+    {
+      "id": "0414406b-ed1c-42f1-93b2-8b696e4257be",
+      "title": "Pay Water Utility Bill",
+      "category": "water",
+      "amount": 420,
+      "due_date": "2026-09-15",
+      "due_time": "11:00",
+      "recurrence": "monthly",
+      "advance_days": 2,
+      "priority": "medium",
+      "notes": "Municipal water authority account #WA-4412",
+      "link": "",
+      "status": "pending",
+      "snoozed_until": null,
+      "last_notified": null,
+      "created_at": "2026-08-22T02:21:49.324249"
+    }
+  ],
+  "history": [],
+  "categories": [
+    {
+      "id": "rent",
+      "name": "Home Rent",
+      "icon": "🏠",
+      "color": "#10b981",
+      "type": "financial"
+    },
+    {
+      "id": "electricity",
+      "name": "Current / Power Bill",
+      "icon": "⚡",
+      "color": "#f59e0b",
+      "type": "financial"
+    },
+    {
+      "id": "water",
+      "name": "Water Bill",
+      "icon": "💧",
+      "color": "#06b6d4",
+      "type": "financial"
+    },
+    {
+      "id": "grocery",
+      "name": "Monthly Grocery",
+      "icon": "🛒",
+      "color": "#8b5cf6",
+      "type": "task"
+    },
+    {
+      "id": "stocks",
+      "name": "Stock Market & SIP",
+      "icon": "📈",
+      "color": "#ec4899",
+      "type": "financial"
+    },
+    {
+      "id": "meeting",
+      "name": "Meetings & Events",
+      "icon": "📅",
+      "color": "#3b82f6",
+      "type": "task"
+    },
+    {
+      "id": "custom",
+      "name": "Other Tasks",
+      "icon": "🔔",
+      "color": "#64748b",
+      "type": "general"
+    }
+  ]
+}

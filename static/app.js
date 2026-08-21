@@ -385,10 +385,10 @@ async function loadData() {
   if (activeTab === 'history') loadHistory();
 
   // Update mobile status UI
-  updateMobileUI();
+  if (typeof updateMobileUI === 'function') updateMobileUI();
 
   // Run in-browser real-time due checker
-  checkRealTimeDueReminders();
+  if (typeof checkAndTriggerReminders === 'function') checkAndTriggerReminders();
 }
 
 let activeCategoryFilter = 'all';
@@ -1059,8 +1059,11 @@ document.addEventListener('DOMContentLoaded', () => {
   loadData();
   requestNotificationPermission();
 
-  // Auto-sync & real-time alert polling every 10s
+  // Auto-sync data every 10s and check due reminders every 15s
   setInterval(loadData, 10000);
+  setInterval(() => {
+    if (typeof checkAndTriggerReminders === 'function') checkAndTriggerReminders();
+  }, 15000);
 
   // Centralized Tab Switching (Desktop & Mobile Nav)
   function switchTab(targetTab) {
@@ -1258,6 +1261,233 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Universal Multi-Channel Mobile Notification Dispatcher (Serverless API + Direct Browser Engine)
+  async function dispatchMobileAlert(config, title, message, priority = 'high', reminder = null) {
+    if (!config || config.enabled === false) return { success: false, error: 'Mobile push is disabled in settings.' };
+    const provider = config.provider || 'ntfy';
+
+    // 1. Try Vercel Serverless / Local Backend API first
+    try {
+      const res = await fetch('/api/test-mobile-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mobile_notifications: config,
+          title,
+          message,
+          priority,
+          reminder
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success) {
+          return { success: true, message: data.result?.message || 'Notification delivered!' };
+        } else if (data && data.error) {
+          return { success: false, error: data.error };
+        }
+      }
+    } catch (apiErr) {
+      // Fallback directly to client-side API execution
+    }
+
+    // 2. Direct Browser-side Dispatchers
+    if (provider === 'telegram') {
+      const botToken = (config.telegram_bot_token || '').trim();
+      const chatId = (config.telegram_chat_id || '').trim();
+
+      if (!botToken || !chatId) {
+        return { success: false, error: 'Please enter your Telegram Bot Token and Chat ID.' };
+      }
+
+      let text = `<b>${title}</b>\n\n${message}`;
+      if (reminder && reminder.link) text += `\n\n🔗 <a href="${reminder.link}">Open Action Link</a>`;
+
+      try {
+        const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: text,
+            parse_mode: 'HTML',
+            disable_web_page_preview: false
+          })
+        });
+        const tgData = await tgRes.json();
+        if (tgData.ok) {
+          return { success: true, message: 'Telegram message sent successfully!' };
+        } else {
+          return { success: false, error: `Telegram Error: ${tgData.description || 'Invalid token or chat ID'}` };
+        }
+      } catch (err) {
+        return { success: false, error: `Telegram request failed: ${err.message}` };
+      }
+    }
+
+    else if (provider === 'whatsapp') {
+      const phone = (config.whatsapp_phone || '').trim().replace('+', '');
+      const apiKey = (config.whatsapp_api_key || '').trim();
+
+      if (!phone || !apiKey) {
+        return { success: false, error: 'Please enter your Phone number (with country code, e.g. 919876543210) and CallMeBot API key.' };
+      }
+
+      const waText = `*${title}*\n\n${message}`;
+      const waUrl = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(waText)}&apikey=${encodeURIComponent(apiKey)}`;
+
+      try {
+        const img = new Image();
+        img.src = waUrl;
+        await fetch(waUrl, { mode: 'no-cors' }).catch(() => {});
+        return { success: true, message: 'WhatsApp alert dispatched! Check your WhatsApp.' };
+      } catch (err) {
+        return { success: false, error: `WhatsApp request failed: ${err.message}` };
+      }
+    }
+
+    else if (provider === 'ntfy') {
+      const topic = (config.ntfy_topic || '').trim();
+      if (!topic) return { success: false, error: 'ntfy topic is empty' };
+
+      try {
+        const headers = {
+          'Title': title,
+          'Priority': priority === 'high' ? '4' : '3',
+          'Tags': 'bell,zap'
+        };
+        if (reminder && reminder.link) headers['Click'] = reminder.link;
+
+        await fetch(`https://ntfy.sh/${encodeURIComponent(topic)}`, {
+          method: 'POST',
+          headers,
+          body: message
+        });
+        return { success: true, message: `Notification pushed to ntfy topic: ${topic}` };
+      } catch (err) {
+        return { success: false, error: `ntfy delivery failed: ${err.message}` };
+      }
+    }
+
+    else if (provider === 'discord') {
+      const webhookUrl = (config.discord_webhook_url || '').trim();
+      if (!webhookUrl) return { success: false, error: 'Discord webhook URL is empty' };
+
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            embeds: [{
+              title: title,
+              description: message,
+              color: 65280,
+              footer: { text: 'Life Reminder Assistant PRO' }
+            }]
+          })
+        });
+        return { success: true, message: 'Discord notification delivered!' };
+      } catch (err) {
+        return { success: false, error: `Discord delivery failed: ${err.message}` };
+      }
+    }
+
+    else if (provider === 'pushover') {
+      const userKey = (config.pushover_user_key || '').trim();
+      const apiToken = (config.pushover_api_token || '').trim();
+
+      if (!userKey || !apiToken) return { success: false, error: 'Pushover User Key & Token required' };
+
+      try {
+        await fetch('https://api.pushover.net/1/messages.json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            token: apiToken,
+            user: userKey,
+            title,
+            message,
+            priority: priority === 'high' ? '1' : '0'
+          })
+        });
+        return { success: true, message: 'Pushover notification delivered!' };
+      } catch (err) {
+        return { success: false, error: `Pushover error: ${err.message}` };
+      }
+    }
+
+    return { success: false, error: `Unsupported provider: ${provider}` };
+  }
+
+  // Active Client-Side Real-Time Reminder Scheduler (checks every 15s)
+  function checkAndTriggerReminders() {
+    const now = new Date();
+
+    reminders.forEach(r => {
+      if (r.status !== 'pending' && r.status !== 'snoozed') return;
+
+      // Handle Snoozed Reminder
+      if (r.status === 'snoozed' && r.snoozed_until) {
+        const snoozeDate = new Date(r.snoozed_until);
+        if (now >= snoozeDate) {
+          r.status = 'pending';
+          r.snoozed_until = null;
+          triggerAlertForReminder(r, '⏰ SNOOZE EXPIRED', `Snooze finished: "${r.title}" is due now.`);
+          saveLocalDB({ settings, reminders, history: historyRecords });
+          renderReminders();
+        }
+        return;
+      }
+
+      // Calculate due timestamp
+      const dueDateTime = new Date(`${r.due_date}T${r.due_time || '09:00'}:00`);
+      const diffMs = dueDateTime - now;
+
+      // Check if Due / Overdue
+      const isDueOrOverdue = diffMs <= 0;
+      // Advance warning check
+      const advanceMs = (parseInt(r.advance_days) || 0) * 24 * 60 * 60 * 1000;
+      const isAdvanceDue = advanceMs > 0 && diffMs > 0 && diffMs <= advanceMs;
+
+      // Cooldown check (don't alert more than once every 2 hours for the same reminder)
+      const lastAlert = r.last_alert_at ? new Date(r.last_alert_at) : null;
+      const hoursSinceAlert = lastAlert ? (now - lastAlert) / (1000 * 60 * 60) : 999;
+
+      if ((isDueOrOverdue || isAdvanceDue) && hoursSinceAlert >= 2) {
+        r.last_alert_at = now.toISOString();
+        const alertPrefix = isDueOrOverdue ? '⚠️ REMINDER DUE' : '🔔 UPCOMING REMINDER';
+        const amountStr = r.amount ? ` (Amount: ${settings.currency || '₹'}${r.amount})` : '';
+        const bodyMsg = `${r.title}${amountStr} - Due on ${r.due_date} at ${r.due_time || '09:00'}.${r.notes ? '\nNote: ' + r.notes : ''}`;
+
+        triggerAlertForReminder(r, alertPrefix, bodyMsg);
+        saveLocalDB({ settings, reminders, history: historyRecords });
+      }
+    });
+  }
+
+  function triggerAlertForReminder(reminder, alertTitle, alertMessage) {
+    // 1. Audio chime
+    audioChime.playMelody();
+
+    // 2. In-App Toast
+    showToast(alertTitle, alertMessage);
+
+    // 3. Browser System Notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification(alertTitle, {
+          body: alertMessage,
+          icon: 'static/favicon.svg'
+        });
+      } catch (e) {}
+    }
+
+    // 4. Multi-Channel Mobile Push Notification (WhatsApp / Telegram / ntfy)
+    if (settings.mobile_notifications && settings.mobile_notifications.enabled !== false) {
+      dispatchMobileAlert(settings.mobile_notifications, alertTitle, alertMessage, reminder.priority || 'high', reminder);
+    }
+  }
+
   async function testMobilePing() {
     const feedback = document.getElementById('mobileTestFeedback');
     const icon = document.getElementById('mobileTestStatusIcon');
@@ -1267,7 +1497,7 @@ document.addEventListener('DOMContentLoaded', () => {
       feedback.className = 'test-feedback-box';
       feedback.classList.remove('hidden');
       if (icon) icon.textContent = '⏳';
-      if (text) text.textContent = 'Sending real-time push ping to your phone...';
+      if (text) text.textContent = `Sending real-time push ping via ${selectedMobileProvider}...`;
     }
 
     const currentConfig = {
@@ -1283,62 +1513,23 @@ document.addEventListener('DOMContentLoaded', () => {
       discord_webhook_url: document.getElementById('discordWebhookInput')?.value.trim() || ''
     };
 
-    if (isBackendConnected) {
-      try {
-        const res = await fetch('/api/test-mobile-notification', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            mobile_notifications: currentConfig,
-            title: '⚡ Life Reminder Assistant Test',
-            message: '📲 Mobile Alert Verified! You will receive timely reminders for Rent, Bills, Groceries, Stocks and Meetings directly on this phone.',
-            priority: 'high'
-          })
-        });
-        const data = await res.json();
-        if (data && data.success) {
-          if (feedback) feedback.className = 'test-feedback-box success';
-          if (icon) icon.textContent = '✅';
-          if (text) text.textContent = data.result?.message || 'Push notification sent! Check your phone right now.';
-          showToast('📱 Mobile Alert Sent!', 'Notification successfully dispatched to your phone.');
-        } else {
-          if (feedback) feedback.className = 'test-feedback-box error';
-          if (icon) icon.textContent = '❌';
-          if (text) text.textContent = data.result?.error || data.error || 'Failed to deliver notification. Check your configuration.';
-          showToast('Mobile Delivery Error', data.result?.error || 'Check provider settings', true);
-        }
-      } catch (err) {
-        if (feedback) feedback.className = 'test-feedback-box error';
-        if (icon) icon.textContent = '❌';
-        if (text) text.textContent = 'Network error contacting server: ' + err.message;
-      }
+    const res = await dispatchMobileAlert(
+      currentConfig,
+      '⚡ Life Reminder Assistant Test',
+      `📲 Alert Verified! Real-time reminders for Rent, Bills, Groceries, Stocks & Meetings are active via ${selectedMobileProvider}.`,
+      'high'
+    );
+
+    if (res.success) {
+      if (feedback) feedback.className = 'test-feedback-box success';
+      if (icon) icon.textContent = '✅';
+      if (text) text.textContent = res.message || 'Notification dispatched! Check your phone right now.';
+      showToast('📱 Push Alert Dispatched!', `Successfully sent via ${selectedMobileProvider}`);
     } else {
-      // Direct browser push to ntfy
-      if (selectedMobileProvider === 'ntfy' && currentConfig.ntfy_topic) {
-        try {
-          await fetch(`https://ntfy.sh/${encodeURIComponent(currentConfig.ntfy_topic)}`, {
-            method: 'POST',
-            headers: {
-              'Title': '⚡ Life Reminder Assistant Test',
-              'Priority': '4',
-              'Tags': 'bell,zap'
-            },
-            body: '📲 Mobile Alert Verified! You will receive timely reminders on this phone.'
-          });
-          if (feedback) feedback.className = 'test-feedback-box success';
-          if (icon) icon.textContent = '✅';
-          if (text) text.textContent = `Notification pushed directly to ntfy topic: ${currentConfig.ntfy_topic}`;
-          showToast('📱 Push Alert Sent!', 'Dispatched to ntfy topic.');
-        } catch (err) {
-          if (feedback) feedback.className = 'test-feedback-box error';
-          if (icon) icon.textContent = '❌';
-          if (text) text.textContent = 'Could not push directly: ' + err.message;
-        }
-      } else {
-        if (feedback) feedback.className = 'test-feedback-box success';
-        if (icon) icon.textContent = '💡';
-        if (text) text.textContent = 'Please run python server.py to test provider: ' + selectedMobileProvider;
-      }
+      if (feedback) feedback.className = 'test-feedback-box error';
+      if (icon) icon.textContent = '❌';
+      if (text) text.textContent = res.error || 'Failed to send notification. Check your configuration.';
+      showToast('Mobile Delivery Error', res.error || 'Check provider settings', true);
     }
   }
 
@@ -1369,7 +1560,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('mobileModal')?.classList.add('hidden');
-    showToast('📱 Mobile Settings Saved', 'Phone notifications configured successfully.');
+    showToast('📱 Mobile Settings Saved', `Phone notifications configured with ${selectedMobileProvider}.`);
     updateMobileUI();
   }
 
